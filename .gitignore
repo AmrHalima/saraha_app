@@ -1,0 +1,7 @@
+/.dev.env
+/.env
+/.prod.env
+/client_secret_59393391069-g57i8128up0oi69tup3qtqrng8b70l98.apps.googleusercontent.com.json
+/node_modules
+/privateKey.pem
+/publicKey.pem

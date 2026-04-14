@@ -1,0 +1,27 @@
+{
+    "name": "saraha_app",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/main.js",
+    "scripts": {
+        "start": "node .",
+        "dev": " cross-env NODE_ENV=dev node --watch .",
+        "prod": " cross-env NODE_ENV=prod node --watch ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "argon2": "^0.44.0",
+        "bcrypt": "^6.0.0",
+        "cors": "^2.8.6",
+        "cross-env": "^10.1.0",
+        "dotenv": "^17.4.1",
+        "express": "^5.2.1",
+        "google-auth-library": "^10.6.2",
+        "joi": "^18.1.2",
+        "jsonwebtoken": "^9.0.3",
+        "mongoose": "^9.4.1"
+    }
+}
