@@ -4,11 +4,18 @@ import authenticate from "../../middlewares/authentication.middleware.js";
 import authorize from "../../middlewares/authorization.middleware.js";
 import { USER_ROLES } from "../../utils/constants.utils.js";
 import responseFormatter from "../../middlewares/unifiedResponse.middleware.js";
+import { validate } from "../../middlewares/index.js";
+import {
+    getAllUsersSchema,
+    profileSchema,
+    updateProfileSchema,
+} from "../../validators/user.validator.js";
 
 const userController = Router();
 
 userController.get(
     "/profile",
+    validate(profileSchema),
     authenticate,
     responseFormatter((req, res) => {
         const result = userService.getProfileService(req.user);
@@ -22,6 +29,7 @@ userController.get(
 
 userController.get(
     "/all",
+    validate(getAllUsersSchema),
     authenticate,
     authorize([USER_ROLES.ADMIN]),
     responseFormatter(async (req, res) => {
@@ -36,6 +44,7 @@ userController.get(
 
 userController.put(
     "/update",
+    validate(updateProfileSchema),
     authenticate,
     responseFormatter(async (req, res) => {
         const result = await userService.updateProfileService(

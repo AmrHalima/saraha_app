@@ -1,7 +1,13 @@
 import { Router } from "express";
 import * as authService from "./auth.service.js";
 import {validate,responseFormatter} from "../../middlewares/index.js";
-import { registerSchema } from "../../validators/auth.validator.js";
+import {
+    gmailLoginSchema,
+    gmailRegisterSchema,
+    loginSchema,
+    refreshTokenSchema,
+    registerSchema,
+} from "../../validators/auth.validator.js";
 
 const authController = Router();
 
@@ -19,6 +25,7 @@ authController.post(
 
 authController.post(
     "/login",
+    validate(loginSchema),
     responseFormatter(async (req, res) => {
         const result = await authService.login(req.body);
         return {
@@ -31,6 +38,7 @@ authController.post(
 
 authController.post(
     "/refresh-token",
+    validate(refreshTokenSchema),
     responseFormatter(async (req, res) => {
         const result = await authService.refreshTokenService(req.headers);
         return {
@@ -43,6 +51,7 @@ authController.post(
 
 authController.post(
     "/gmail/register",
+    validate(gmailRegisterSchema),
     responseFormatter(async (req, res) => {
         const result = await authService.gmailRegisterService(req.body);
         return {
@@ -55,6 +64,7 @@ authController.post(
 
 authController.post(
     "/gmail/login",
+    validate(gmailLoginSchema),
     responseFormatter(async (req, res) => {
         const result = await authService.gmailLoginService(req.body);
         return {
