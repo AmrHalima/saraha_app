@@ -4,11 +4,12 @@ import authenticate from "../../middlewares/authentication.middleware.js";
 import authorize from "../../middlewares/authorization.middleware.js";
 import { USER_ROLES } from "../../utils/constants.utils.js";
 import responseFormatter from "../../middlewares/unifiedResponse.middleware.js";
-import { validate } from "../../middlewares/index.js";
+import { multerLocal, validate } from "../../middlewares/index.js";
 import {
     getAllUsersSchema,
     profileSchema,
     updateProfileSchema,
+    uploadProfileImgSchema,
 } from "../../validators/user.validator.js";
 
 const userController = Router();
@@ -59,4 +60,17 @@ userController.put(
     }),
 );
 
+userController.patch(
+    "/upload-profile-img",
+    validate(uploadProfileImgSchema),
+    authenticate,
+    multerLocal("profileImages").single("profileImg"),
+    responseFormatter(async (req, res) => {
+        const result = await userService.uploadProfileImg(req.user, req.file);
+        return {
+            message: "profile uploaded successfully",
+            meta: { statusCode: 200 },
+        };
+    }),
+);
 export default userController;

@@ -68,21 +68,34 @@ export const updateProfileSchema = {
                 "string.pattern.base":
                     "phoneNumber must be a valid international phone number",
             }),
-        gender: Joi.number().integer().valid(...Object.values(GENDER)).messages({
-            "number.base": "gender must be a number",
-            "number.integer": "gender must be either 0 (male) or 1 (female)",
-            "any.only": "gender must be either 0 (male) or 1 (female)",
-        }),
+        gender: Joi.number()
+            .integer()
+            .valid(...Object.values(GENDER))
+            .messages({
+                "number.base": "gender must be a number",
+                "number.integer":
+                    "gender must be either 0 (male) or 1 (female)",
+                "any.only": "gender must be either 0 (male) or 1 (female)",
+            }),
     })
         .min(1)
         .required()
         .unknown(false)
         .messages({
             "object.base": "request body must be a valid object",
-            "object.min": "request body must include at least one field to update",
+            "object.min":
+                "request body must include at least one field to update",
             "any.required": "request body is required",
             "object.unknown": "{{#label}} is not allowed",
         }),
+};
+
+export const uploadProfileImgSchema = {
+    headers: Joi.object({
+        authorization: authorizationHeaderSchema,
+    })
+        .required()
+        .unknown(true),
 };
 
 export const userIdParamSchema = {
