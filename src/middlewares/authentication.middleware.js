@@ -1,5 +1,6 @@
 import { TOKEN_TYPES } from "../utils/constants.utils.js";
 import { getUserAndDecodedTokenFromToken } from "../utils/tokens.utils.js";
+import { UnauthorizedError } from "../utils/Error/exceptions.js";
 
 const authenticate = async (req, res, next) => {
     const { authorization } = req.headers;
@@ -19,9 +20,7 @@ const authenticate = async (req, res, next) => {
         );
         if (!user) {
             return next(
-                new Error("Invalid user credentials , register first", {
-                    cause: { status: 401 },
-                }),
+                new UnauthorizedError("Invalid user credentials , register first"),
             );
         }
         req.user = user;

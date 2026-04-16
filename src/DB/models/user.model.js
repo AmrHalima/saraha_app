@@ -59,6 +59,14 @@ const userSchema = new mongoose.Schema(
     profileImg: {
       type: String,
     },
+    loggedOutAllAt: {
+      type: Date,
+      default: null,
+    },
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     toJSON: { getters: true },

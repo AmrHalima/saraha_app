@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import fs from "node:fs";
 import userRepository from "../DB/repositories/user.repository.js";
+import TokenRepository from "../DB/repositories/token.repository.js";
 import { TOKEN_TYPES, USER_ROLES } from "./constants.utils.js";
+import { UnauthorizedError } from "./Error/exceptions.js";
 
 const host = envConfig.app.HOST;
 
@@ -92,6 +94,28 @@ export const getUserAndDecodedTokenFromToken = async (token, tokenType) => {
         throw new Error(error.message, { cause: { status: 401 } });
     }
     const user = await userRepository.findById(decodedData.sub);
+
+    if (!user) {
+        throw new UnauthorizedError("Invalid user credentials , register first");
+    }
+
+    const revokedToken = await TokenRepository.findOne({ jti: decodedData.jti });
+    if (revokedToken) {
+        throw new UnauthorizedError("token is revoked");
+    }
+
+    if (
+        user.loggedOutAllAt &&
+        decodedData.iat &&
+        decodedData.iat * 1000 <= new Date(user.loggedOutAllAt).getTime()
+    ) {
+        throw new UnauthorizedError("token is revoked");
+    }
+
+    if ((decodedData.tokenVersion ?? 0) !== (user.tokenVersion ?? 0)) {
+        throw new UnauthorizedError("token is revoked");
+    }
+
     return { user, decodedData };
 };
 

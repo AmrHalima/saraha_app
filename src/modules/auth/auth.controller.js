@@ -1,10 +1,11 @@
 import { Router } from "express";
 import * as authService from "./auth.service.js";
-import {validate,responseFormatter} from "../../middlewares/index.js";
+import {validate,responseFormatter, authenticate} from "../../middlewares/index.js";
 import {
     gmailLoginSchema,
     gmailRegisterSchema,
     loginSchema,
+    logoutSchema,
     refreshTokenSchema,
     registerSchema,
 } from "../../validators/auth.validator.js";
@@ -75,4 +76,16 @@ authController.post(
     }),
 );
 
+authController.post(
+    "/logout",
+    authenticate,
+    validate(logoutSchema),
+    responseFormatter(async (req, res) => {
+        await authService.logoutService(req);
+        return {
+            message: "logged out successfully",
+            meta: { statusCode: 200 },
+        };
+    }),
+);
 export default authController;

@@ -1,6 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import envConfig from "../../config/env.config.js";
 import UserRepository from "../../DB/repositories/user.repository.js";
+import TokenRepository from "../../DB/repositories/token.repository.js";
 import {
     BadRequestError,
     ConflictError,
@@ -19,6 +20,8 @@ import {
     getUserAndDecodedTokenFromToken,
 } from "../../utils/tokens.utils.js";
 import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
+
 const envJWT = envConfig.jwt;
 const client = new OAuth2Client();
 
@@ -28,13 +31,16 @@ const generateTokensHelper = (user, selectedToken = -1) => {
             sub: user._id || user.sub,
             role: user.role,
             email: user.email,
+            tokenVersion: user.tokenVersion ?? 0,
         },
         options: {
             access: {
                 expiresIn: envJWT[user.role].ACCESS_EXP,
+                jwtid: uuidv4(),
             },
             refresh: {
                 expiresIn: envJWT[user.role].REFRESH_EXP,
+                jwtid: uuidv4(),
             },
         },
         selectedToken,
@@ -159,4 +165,75 @@ export const gmailLoginService = async (body) => {
     );
 
     return generateTokensHelper(updatedUser);
+};
+
+export const logoutService = async ({ user, headers, body }) => {
+    const mode = body?.mode || "current";
+    const { authorization } = headers;
+
+    if (mode === "all") {
+        const { decodedData } = await getUserAndDecodedTokenFromToken(
+            authorization,
+            TOKEN_TYPES.ACCESS,
+        );
+
+        await Promise.all([
+            UserRepository.findByIdAndUpdate(user._id, {
+                $set: { loggedOutAllAt: new Date() },
+                $inc: { tokenVersion: 1 },
+            }),
+            TokenRepository.updateOne(
+                { jti: decodedData.jti },
+                {
+                    jti: decodedData.jti,
+                    userId: user._id,
+                    expiresIn: new Date(decodedData.exp * 1000),
+                },
+                { upsert: true },
+            ),
+        ]);
+        return null;
+    }
+
+    const refreshToken = headers["x-refresh-token"];
+
+    if (!refreshToken) {
+        throw new BadRequestError("x-refresh-token header is required");
+    }
+
+    const { decodedData } = await getUserAndDecodedTokenFromToken(
+        authorization,
+        TOKEN_TYPES.ACCESS,
+    );
+    const { decodedData: refreshDecodedData } = await getUserAndDecodedTokenFromToken(
+        refreshToken,
+        TOKEN_TYPES.REFRESH,
+    );
+
+    if (String(refreshDecodedData.sub) !== String(user._id)) {
+        throw new UnauthorizedError("invalid token owner");
+    }
+
+    await Promise.all([
+        TokenRepository.updateOne(
+            { jti: decodedData.jti },
+            {
+                jti: decodedData.jti,
+                userId: user._id,
+                expiresIn: new Date(decodedData.exp * 1000),
+            },
+            { upsert: true },
+        ),
+        TokenRepository.updateOne(
+            { jti: refreshDecodedData.jti },
+            {
+                jti: refreshDecodedData.jti,
+                userId: user._id,
+                expiresIn: new Date(refreshDecodedData.exp * 1000),
+            },
+            { upsert: true },
+        ),
+    ]);
+
+    return null;
 };

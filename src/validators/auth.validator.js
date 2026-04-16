@@ -105,6 +105,30 @@ export const refreshTokenSchema = {
         .unknown(true),
 };
 
+export const logoutSchema = {
+    headers: Joi.object({
+        authorization: authorizationHeaderSchema,
+        "x-refresh-token": Joi.string()
+            .trim()
+            .pattern(/^Bearer\s+[^\s]+$/)
+            .optional()
+            .messages({
+                "string.base": "x-refresh-token header must be a string",
+                "string.pattern.base":
+                    "x-refresh-token header must use this format: Bearer <token>",
+            }),
+    })
+        .required()
+        .unknown(true),
+    body: Joi.object({
+        mode: Joi.string().valid("current", "all").default("current").messages({
+            "string.base": "mode must be a string",
+            "any.only": "mode must be either current or all",
+        }),
+    })
+        .unknown(false),
+};
+
 const idTokenBodySchema = Joi.object({
     idToken: Joi.string().trim().required().messages({
         "string.base": "idToken must be a string",
