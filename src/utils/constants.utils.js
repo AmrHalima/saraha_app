@@ -25,3 +25,8 @@ export const FILES_EXTENSIONS = {
   AUDIO: ["mp3"],
   APPLICATION: ["json", "xml"],
 };
+export const EMAIL_TYPES = {
+    WELCOME: "welcome",
+    CONFIRM_EMAIL: "confirmEmail",
+    RESET_PASSWORD: "resetPassword",
+};

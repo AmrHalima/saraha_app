@@ -9,8 +9,8 @@ const envConfig = {
                 ? `${process.env.HOST}:${process.env.PORT}`
                 : "http://localhost:3000",
     },
-    GCP:{
-        CLIENT_ID : process.env.GCP_CLIENT_ID,
+    GCP: {
+        CLIENT_ID: process.env.GCP_CLIENT_ID,
     },
     client: {
         ORIGIN:
@@ -41,6 +41,10 @@ const envConfig = {
             REFRESH_SECRET: process.env.REFRESH_SECRET_ADMIN,
             REFRESH_EXP: process.env.REFRESH_EXP_ADMIN,
         },
+    },
+    email: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
     },
 };
 export default envConfig;

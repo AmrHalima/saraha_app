@@ -151,3 +151,70 @@ export const gmailRegisterSchema = {
 export const gmailLoginSchema = {
     body: idTokenBodySchema,
 };
+
+const otpSchema = Joi.string().trim().length(6).pattern(/^\d{6}$/).messages({
+    "string.base": "otp must be a string",
+    "string.empty": "otp is required",
+    "string.length": "otp must contain exactly 6 digits",
+    "string.pattern.base": "otp must contain only digits",
+});
+
+export const verifyEmailSchema = {
+    body: Joi.object({
+        email: emailSchema.required(),
+        otp: otpSchema.required(),
+    })
+        .required()
+        .unknown(false)
+        .messages({
+            "object.base": "request body must be a valid object",
+            "any.required": "request body is required",
+            "object.unknown": "{{#label}} is not allowed",
+        }),
+};
+
+export const forgotPasswordSchema = {
+    body: Joi.object({
+        email: emailSchema.required(),
+    })
+        .required()
+        .unknown(false)
+        .messages({
+            "object.base": "request body must be a valid object",
+            "any.required": "request body is required",
+            "object.unknown": "{{#label}} is not allowed",
+        }),
+};
+
+export const resetPasswordSchema = {
+    body: Joi.object({
+        email: emailSchema.required(),
+        otp: otpSchema.required(),
+        newPassword: passwordSchema.required().label("newPassword"),
+    })
+        .required()
+        .unknown(false)
+        .messages({
+            "object.base": "request body must be a valid object",
+            "any.required": "request body is required",
+            "object.unknown": "{{#label}} is not allowed",
+        }),
+};
+
+export const updatePasswordSchema = {
+    body: Joi.object({
+        oldPassword: Joi.string().required().messages({
+            "string.base": "oldPassword must be a string",
+            "string.empty": "oldPassword is required",
+            "any.required": "oldPassword is required",
+        }),
+        newPassword: passwordSchema.required().label("newPassword"),
+    })
+        .required()
+        .unknown(false)
+        .messages({
+            "object.base": "request body must be a valid object",
+            "any.required": "request body is required",
+            "object.unknown": "{{#label}} is not allowed",
+        }),
+};
